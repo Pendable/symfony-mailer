@@ -1,0 +1,31 @@
+{
+  "name": "pendable/symfony-mailer",
+  "description": "Symfony Pendable Mailer Bridge",
+  "require": {
+    "php": "^8.0",
+    "psr/event-dispatcher": "^1",
+    "symfony/mailer": "^5.4.21|^6.2.7"
+  },
+  "require-dev": {
+    "symfony/http-client": "^5.4|^6.0"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jaspal Singh",
+      "email": "jaspal@pendable.io"
+    },
+    {
+      "name": "Christopher Espiritu",
+      "email": "chris@pendable.io"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Pendable\\SymfonyMailer\\": ""
+    },
+    "exclude-from-classmap": [
+      "/Tests/"
+    ]
+  }
+}
