@@ -4,9 +4,7 @@
   "require": {
     "php": "^8.0",
     "psr/event-dispatcher": "^1",
-    "symfony/mailer": "^5.4.21|^6.2.7"
-  },
-  "require-dev": {
+    "symfony/mailer": "^5.4.21|^6.2.7",
     "symfony/http-client": "^5.4|^6.0"
   },
   "license": "MIT",
