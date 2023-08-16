@@ -1,4 +1,4 @@
-Pnedable Symfony Mailer
+Pendable Symfony Mailer
 =================
 
 Provides Pendable integration for Symfony Mailer.

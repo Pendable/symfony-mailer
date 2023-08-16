@@ -23,8 +23,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
  */
 class PendableApiTransport extends AbstractApiTransport
 {
-    // private const HOST = 'api.pendable.io';
-    private const HOST = '127.0.0.1:38000';
+    private const ENDPOINT = 'https://api.pendable.io';
 
     private string $key;
 
@@ -42,9 +41,8 @@ class PendableApiTransport extends AbstractApiTransport
     protected function doSendApi(SentMessage $sentMessage, Email $email, Envelope $envelope): ResponseInterface
     {
         $payload = $this->getPayload($email, $envelope);
-        // dd($payload);
-        // @todo: https in prod and staging
-        $response = $this->client->request('POST', 'http://' . $this->getEndpoint() . '/emails', [
+
+        $response = $this->client->request('POST', $this->getEndpoint() . '/emails', [
             'headers' => [
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $this->key,
@@ -153,7 +151,13 @@ class PendableApiTransport extends AbstractApiTransport
 
     private function getEndpoint(): ?string
     {
-        return ($this->host ?: self::HOST) . ($this->port ? ':' . $this->port : '');
+        $endpoint = getenv('PENDABLE_API_ENDPOINT');
+
+        if (empty($endpoint)) {
+             $endpoint = self::ENDPOINT;
+        }
+
+        return rtrim($endpoint, '/');
     }
 
 }
