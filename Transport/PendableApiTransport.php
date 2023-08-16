@@ -151,10 +151,10 @@ class PendableApiTransport extends AbstractApiTransport
 
     private function getEndpoint(): ?string
     {
-        $endpoint = getenv('PENDABLE_API_ENDPOINT');
+        $endpoint = self::ENDPOINT;
 
-        if (empty($endpoint)) {
-             $endpoint = self::ENDPOINT;
+        if (!empty($_ENV['PENDABLE_API_ENDPOINT'])) {
+            $endpoint = $_ENV['PENDABLE_API_ENDPOINT'];
         }
 
         return rtrim($endpoint, '/');
