@@ -2,6 +2,7 @@
 
 namespace Pendable\SymfonyMailer\Transport;
 
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mailer\Envelope;
@@ -14,8 +15,11 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\Mailer\Transport\AbstractApiTransport;
 use Symfony\Component\Mailer\Exception\HttpTransportException;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 
 
 /**
@@ -57,14 +61,20 @@ class PendableApiTransport extends AbstractApiTransport
             throw new HttpTransportException('Unable to send an email: ' . $response->getContent(false) . sprintf(' (code %d).', $statusCode), $response);
         } catch (TransportExceptionInterface $e) {
             throw new HttpTransportException('Could not reach the remote Pendable server.', $response, 0, $e);
+        } catch (Exception $e) {
+            throw new HttpTransportException('Unable to send an email: ' . $e->getMessage(), $response, 0, $e);
         }
 
         if (200 !== $statusCode) {
 
             $errorMessage = "";
-            // dd($result);
-            if (isset($result['detail']) && is_array($result['detail'])) {
-                foreach ($result['detail'] as $error) {
+
+            $detail = $result['detail'] ?? null;
+
+            if (is_string($detail)) {
+                $errorMessage = $detail;
+            } else if (is_array($detail)) {
+                foreach ($detail as $error) {
                     if (isset($error['loc'][1])) {
                         $errorMessage .= "\"" . $error['loc'][1] . "\" - " . $error['msg'] . ". " . PHP_EOL;
                     }
