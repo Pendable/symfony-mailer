@@ -19,6 +19,10 @@ use Symfony\Component\Mailer\Exception\HttpTransportException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 
+/**
+ * Class PendableApiTransportTest
+ * @author Christopher Espiritu <chris@pendable.io>
+ */
 class PendableApiTransportTest extends TestCase
 {
     /**
