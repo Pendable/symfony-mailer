@@ -3,10 +3,10 @@
 namespace Transport;
 
 use Psr\Log\NullLogger;
+use Symfony\Component\Mailer\Transport\Dsn;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Pendable\SymfonyMailer\Transport\PendableApiTransport;
 use Symfony\Component\Mailer\Test\TransportFactoryTestCase;
-use Symfony\Component\Mailer\Transport\Dsn;
 use Pendable\SymfonyMailer\Transport\PendableTransportFactory;
 use Symfony\Component\Mailer\Transport\TransportFactoryInterface;
 
