@@ -17,6 +17,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 use Pendable\SymfonyMailer\Transport\PendableApiTransport;
 use Symfony\Component\Mailer\Exception\HttpTransportException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Pendable\SymfonyMailer\Transport\Exception\UnsupportedFeatureException;
 
 
 /**
@@ -26,10 +27,11 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 class PendableApiTransportTest extends TestCase
 {
     /**
+     * @test
      * @return void
      * @throws ReflectionException
      */
-    public function testCustomHeader()
+    public function customHeadersAreGettingInjectedCorrectly()
     {
         $email = new Email();
 
@@ -47,7 +49,6 @@ class PendableApiTransportTest extends TestCase
 
         $transport = new PendableApiTransport('ACCESS_KEY');
         $method = new ReflectionMethod(PendableApiTransport::class, 'getPayload');
-        $method->setAccessible(true);
         $payload = $method->invoke($transport, $email, $envelope);
 
         $this->assertArrayHasKey('tags', $payload);
@@ -70,9 +71,10 @@ class PendableApiTransportTest extends TestCase
     }
 
     /**
+     * @test
      * @throws TransportExceptionInterface
      */
-    public function testSendThrowsForErrorResponse()
+    public function shouldThrowForErrorResponse()
     {
         $client = new MockHttpClient(function (string $method, string $url, array $options): ResponseInterface {
             $this->assertSame('POST', $method);
@@ -101,9 +103,11 @@ class PendableApiTransportTest extends TestCase
     }
 
     /**
+     * @param bool $withAttachment
+     * @return array
      * @throws TransportExceptionInterface
      */
-    public function testSend()
+    private function canSendBasic(bool $withAttachment): array
     {
         $client = new MockHttpClient(function (string $method, string $url, array $options): ResponseInterface {
             $this->assertSame('POST', $method);
@@ -120,7 +124,6 @@ class PendableApiTransportTest extends TestCase
 
         $transport = new PendableApiTransport('ACCESS_KEY', $client);
 
-        $dataPart = new DataPart('body');
         $mail = new Email();
         $mail->subject('Hello!')
             ->to(new Address('dev@pendable.io', 'Pendable Developer'))
@@ -129,11 +132,38 @@ class PendableApiTransportTest extends TestCase
             ->html('Hello there!')
             ->addCc('foo@bar.fr')
             ->addBcc('foo@bar.fr')
-            ->addReplyTo('foo@bar.fr')
-            ->addPart($dataPart);
+            ->addReplyTo('foo@bar.fr');
+
+
+        if ($withAttachment) {
+            $mail->addPart(new DataPart('body'));
+        }
 
         $message = $transport->send($mail);
 
+        return [$client, $mail, $message];
+    }
+
+    /**
+     * @test
+     * @throws TransportExceptionInterface
+     */
+    public function canSendEmail()
+    {
+        [, , $message] = $this->canSendBasic(false);
         $this->assertSame('1234-1234-1234', $message->getMessageId());
     }
+
+    /**
+     * @test
+     * @return void
+     * @throws TransportExceptionInterface
+     */
+    public function addingAttachmentShouldThrowException()
+    {
+        $this->expectException(UnsupportedFeatureException::class);
+        $this->expectExceptionMessage("Pendable does not support attachments at this time.");
+        $this->canSendBasic(true);
+    }
+
 }

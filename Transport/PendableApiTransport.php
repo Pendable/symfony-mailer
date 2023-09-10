@@ -17,10 +17,12 @@ use Symfony\Component\Mailer\Transport\AbstractApiTransport;
 use Symfony\Component\Mailer\Exception\HttpTransportException;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Pendable\SymfonyMailer\Transport\Exception\UnsupportedFeatureException;
 
 
 /**
  * @author Jaspal Singh <jaspal@pendable.io>
+ * @author Christopher Espiritu <chris@pendable.io>
  */
 class PendableApiTransport extends AbstractApiTransport
 {
@@ -86,32 +88,56 @@ class PendableApiTransport extends AbstractApiTransport
         return $response;
     }
 
+    /**
+     * @param Email $email
+     * @param Envelope $envelope
+     * @return void
+     */
+    private function validateEmailForFeatureSupport(Email $email, Envelope $envelope): void
+    {
+        if (!empty($email->getAttachments())) {
+            throw new UnsupportedFeatureException('Pendable does not support attachments at this time.');
+        }
+
+        $recipients = $this->getRecipients($email, $envelope);
+        $recipientsCount = count($recipients);
+
+        if ($recipientsCount > 1) {
+            throw new UnsupportedFeatureException('Pendable does not support multiple recipients at this time.');
+        }
+    }
+
     private function getPayload(Email $email, Envelope $envelope): array
     {
+        $this->validateEmailForFeatureSupport($email, $envelope);
 
         $payload = [
             'from' => $envelope->getSender()->toString(),
-            // @todo - support multiple to addresses
             'to' => current($this->stringifyAddresses($this->getRecipients($email, $envelope))),
             'subject' => $email->getSubject(),
         ];
         if ($email->getReplyTo()) {
             $payload['reply_to'] = current($this->stringifyAddresses($email->getReplyTo()));
         }
+
         if ($email->getCc()) {
             $payload['cc'] = $this->stringifyAddresses($email->getCc());
         }
+
         if ($email->getBcc()) {
             $payload['bcc'] = $this->stringifyAddresses($email->getBcc());
         }
+
         if ($email->getTextBody()) {
             $payload['text_body'] = $email->getTextBody();
         }
+
         if ($email->getHtmlBody()) {
             $payload['html_body'] = $email->getHtmlBody();
         }
 
         $headersAndTags = $this->prepareHeadersAndTags($email->getHeaders());
+
         if ($headersAndTags) {
             $payload = array_merge($payload, $headersAndTags);
         }

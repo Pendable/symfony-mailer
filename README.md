@@ -4,10 +4,13 @@ Pendable Symfony Mailer
 Provides Pendable integration for Symfony Mailer.
 
 
-Pendable 
+Pendable
 ------------
 
-Pendable provides a wrapper service around Amazon SES adding capabilities to Parallelize your Email Sending, Prioritize your Emails, Schedule delivery in the future, Track Open, Click and other events, Active throttling based on your Bounces and Complaints, Filter Spam Domains, Maintain a healthy Contact list, Retrieve, Troubleshoot, and Resend messages, Timeline view of all customer communication.
+Pendable provides a wrapper service around Amazon SES adding capabilities to Parallelize your Email Sending, Prioritize
+your Emails, Schedule delivery in the future, Track Open, Click and other events, Active throttling based on your
+Bounces and Complaints, Filter Spam Domains, Maintain a healthy Contact list, Retrieve, Troubleshoot, and Resend
+messages, Timeline view of all customer communication.
 
 More info on [pendable.io](https://pendable.io/documentation)
 
@@ -45,36 +48,45 @@ MAILER_DSN=pendable+api://$PENDABLE_API_KEY@default
 
 ```php
 $email = (new Email())
-            ->from('mydomain@test.com')
-            ->to('to@test.com')
-            // ->cc('...')
-            // ->addCc('...')
-            // ->bcc('...')
-            // ->replyTo('...')
-            ->subject("Subject")
-            ->html('<p>Html content of Symfony Pendable email.</p>')
-            ->text('Text content of your Symfony Pendable text-only email.');
+  ->from('mydomain@test.com')
+  ->to('to@test.com')
+  // ->cc('...')
+  // ->addCc('...')
+  // ->bcc('...')
+  // ->replyTo('...')
+  ->subject("Subject")
+  ->html('<p>Html content of Symfony Pendable email.</p>')
+  ->text('Text content of your Symfony Pendable text-only email.');
 
-        $email->getHeaders()
-            ->add(new MetadataHeader('key-1', 'value-1')) // Custom field called 'key-1'
-            ->add(new MetadataHeader('key-2', 'value-2')) // Custom field called 'key-2'
-            ->add(new TagHeader('TagInHeaders1')) // Tags
-            ->add(new TagHeader('TagInHeaders2')) // Tags
-            ->addTextHeader('priority', 60)
-            ->addTextHeader('config_identifier', 'custom key')
-            ->addTextHeader('client_email_id', '123476AB')
-            ->addTextHeader('schedule_send_at', '2023-06-25T22:37:26+05:30');
+$email->getHeaders()
+    ->add(new MetadataHeader('key-1', 'value-1')) // Custom field called 'key-1'
+    ->add(new MetadataHeader('key-2', 'value-2')) // Custom field called 'key-2'
+    ->add(new TagHeader('TagInHeaders1')) // Tags
+    ->add(new TagHeader('TagInHeaders2')) // Tags
+    ->addTextHeader('priority', 60)
+    ->addTextHeader('config_identifier', 'custom key')
+    ->addTextHeader('client_email_id', '123476AB')
+    ->addTextHeader('schedule_send_at', '2023-06-25T22:37:26+05:30');
 
-        // Send the email using the custom Pendable transport
-        try {
-            $resp = $mailer->send($email);
-            return new Response('Email sent successfully to Pendable.');
-        } catch (\Exception $e) {
-            return new Response('Failed to send email to Pendable: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+// Send the email using the custom Pendable transport
+try {
+    $resp = $mailer->send($email);
+    return new Response('Email sent successfully to Pendable.');
+} catch (\Exception $e) {
+    return new Response('Failed to send email to Pendable: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+}
 ```
 
-Resources
+## Changelogs
+---------
+
+- v1.0.1 (September 10, 2023):
+    - Throw exception when some feature is not yet supported by Pendable
+    - Readme updated
+- v1.0.0 (September 1, 2023):
+    - Initial release
+
+## Resources
 ---------
 
 * [Report issues](https://github.com/pendable/symfony-mailer)
